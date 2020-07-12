@@ -171,6 +171,7 @@ darkmodeToggler.addEventListener('click', () => {
 		localStorage.setItem('darkmood', 'css/main.css');
 		document.getElementById('css-link').href = 'css/main.css';
 	}
+	document.querySelector('.darkmode-toggler').classList.toggle('darkmode-toggler-dark');
 });
 //darkmode
 
