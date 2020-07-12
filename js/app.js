@@ -14,7 +14,6 @@ let myDate = new Date();
 let ApiKey = 'e0ad44b9250db28e45669dbbcc1f88a9';
 
 let darkmodeStorge = localStorage.getItem('darkmoodStorge');
-
 window.addEventListener('load', () => {
 	getAllLocations();
 
@@ -50,23 +49,24 @@ let locationsBtn = document.querySelectorAll('.loactionsChoice .btn');
 document.addEventListener('click', (e) => {
 	let target = e.target;
 	if (target && target.classList.contains('btnStyle')) {
+		document.querySelector('.loading').style.display = 'block';
 		let lat = target.dataset.latitude;
 		let lang = target.dataset.longitude;
 
-		if (lat == '' && lang == '') {
-			//make sure geolacttin denied mesaage is not there
-			notificationMesssge.innerText = '';
-			geolocationWeather();
-		} else {
-			notificationMesssge.innerText = '';
+		notificationMesssge.innerText = '';
 
-			const currentNeerUrl = `https://api.openweathermap.org/data/2.5/find?lat=${lat}&lon=${lang}&cnt=6&units=metric&appid=${ApiKey}`;
-			//forcast for 7 neext 7 days api URL
-			const WeekUrl = `https://api.openweathermap.org/data/2.5/onecall?lat=${lat}&lon=${lang}&exclude=minutely,hourly&units=metric&appid=${ApiKey}`;
+		const currentNeerUrl = `https://api.openweathermap.org/data/2.5/find?lat=${lat}&lon=${lang}&cnt=6&units=metric&appid=${ApiKey}`;
+		//forcast for 7 neext 7 days api URL
+		const WeekUrl = `https://api.openweathermap.org/data/2.5/onecall?lat=${lat}&lon=${lang}&exclude=minutely,hourly&units=metric&appid=${ApiKey}`;
 
-			getWeekWeather(WeekUrl);
-			getCurrentNeerWeather(currentNeerUrl);
-		}
+		getWeekWeather(WeekUrl);
+		getCurrentNeerWeather(currentNeerUrl);
+	}
+	if (target && target.classList.contains('my-location')) {
+		document.querySelector('.loading').style.display = 'block';
+		//make sure geolacttin denied mesaage is not there
+		notificationMesssge.innerText = '';
+		geolocationWeather();
 	}
 });
 
@@ -85,6 +85,7 @@ function getTodayName(dayNum) {
 }
 
 function showError(error) {
+	document.querySelector('.loading').style.display = 'none';
 	//show message if user denied allowing Geolocation
 	notificationMesssge.innerText = error.message;
 }
@@ -138,8 +139,9 @@ async function getCurrentNeerWeather(currentNeerUrl) {
 		`;
 			locationsNeerDiv.append(newDiv);
 		}
+		document.querySelector('.loading').style.display = 'none';
 
-	
+		console.log(weather);
 	}
 }
 //calling the api
@@ -174,7 +176,7 @@ async function getWeekWeather(WeekUrl) {
 
 		MaxTempValue.innerText = `${Math.floor(weather.daily[0].temp.max)}° `;
 		MinTempValue.innerText = `${Math.floor(weather.daily[0].temp.min)}° `;
-	
+		console.log(weather);
 	}
 }
 //dark mode
@@ -222,16 +224,45 @@ function darkmodeFunc() {
 	document.querySelector('.add-city-btn').classList.toggle('add-city-btn-dark');
 }
 
+let clearAll = document.querySelector('.clear-all-btn');
+
+clearAll.addEventListener('click', () => {
+	clearAllLocations();
+});
+
+async function clearAllLocations() {
+	if (confirm('Clear All?')) {
+		Storage.clearAllLocations();
+
+		document.querySelector('.loactionsChoice').innerHTML = '';
+		if (darkmodeStorge == 'true' || darkMoodStatus == true) {
+			//if darkmood is on add dark my location btn
+			document.querySelector('.loactionsChoice').innerHTML = `<div>
+			<button class="btn btn-dark  my-2 mx-2 btnActive btnActive-dark my-location" type="button">My Location</button>
+			  </div>`;
+		} else {
+			//if darkmood is off add normal my location btn
+			document.querySelector('.loactionsChoice').innerHTML = ` <div>
+				<button class="btn my-2 mx-2 btnActive my-location" type="button">My Location</button>
+			  </div>`;
+		}
+	} else {
+		return false;
+	}
+}
 //adding new city
 let addCityBtn = document.querySelector('.add-city-btn');
 
 addCityBtn.addEventListener('click', () => {
+	document.querySelector('.loading').style.display = 'block';
 	let inputValue = document.querySelector('input').value;
 	if (inputValue == '') {
 		alert('Enter Location Name');
+		document.querySelector('.loading').style.display = 'none';
 	} else {
 		let cityUrl = `https://api.opencagedata.com/geocode/v1/json?q=${inputValue}&key=82d3487b13b54cddbda225f84f863798`;
 		getCityLatLang(cityUrl, inputValue);
+		document.querySelector('input').value = '';
 	}
 });
 
@@ -245,6 +276,7 @@ async function getCityLatLang(cityUrl, inputValue) {
 			let long = cityIinfo.results[0].geometry.lng;
 
 			addLocation(inputValue, lat, long);
+			document.querySelector('.loading').style.display = 'none';
 		}
 	} catch (e) {
 		// alert('Some thing went wrong, Try another name, for better result you can use country name');
@@ -252,59 +284,27 @@ async function getCityLatLang(cityUrl, inputValue) {
 	}
 }
 
-let LocationsObj = new Locations();
-
-let clearAll = document.querySelector('.clear-all-btn');
-
-clearAll.addEventListener('click', () => {
-	clearAllLocations();
-});
-
-async function clearAllLocations() {
-	if (confirm('Clear All?')) {
-		let clear = await LocationsObj.clear();
-		clear.onsuccess = () => {
-			document.querySelector('.loactionsChoice').innerHTML = '';
-			if (darkmodeStorge == 'true' || darkMoodStatus == true) {
-				//if darkmood is on add dark my location btn
-				document.querySelector('.loactionsChoice').innerHTML = `<div>
-			<button class="btn btn-dark  my-2 mx-2 btnActive btnActive-dark" data-latitude="" data-longitude="" type="button">My Location</button>
-			  </div>`;
-			} else {
-				//if darkmood is off add normal my location btn
-				document.querySelector('.loactionsChoice').innerHTML = ` <div>
-				<button class="btn my-2 mx-2 btnActive" data-latitude="" data-longitude="" type="button">My Location</button>
-			  </div>`;
-			}
-		};
-
-		clear.onerror = () => {
-			alert('Something Went Wrong While Deleting All Locations!!!');
-		};
-	} else {
-		return false;
+let locations = [];
+let locationsStorage = Storage.getLocations();
+if (locationsStorage) {
+	for (let i = 0; i < locationsStorage.length; i++) {
+		locations.push(locationsStorage[i]);
 	}
 }
 async function addLocation(loc, lat, long) {
-	let add = await LocationsObj.add({ location: loc, latitude: lat, longitude: long });
+	let id = Date.now();
+	locations.push({ location: loc, latitude: lat, longitude: long, id: id });
+	Storage.saveLocations(locations);
+	getAllLocations();
+}
+function getAllLocations() {
+	let locations = Storage.getLocations();
 
-	add.onsuccess = () => {
-		getAllLocations();
-	};
+	if (locations) {
+		displayLocation(locations);
+	}
 }
-async function getAllLocations() {
-	let request = await LocationsObj.getAll();
-	let locationArray = [];
-	request.onsuccess = () => {
-		let cursor = request.result;
-		if (cursor) {
-			locationArray.push(cursor.value);
-			cursor.continue();
-		} else {
-			displayLocation(locationArray);
-		}
-	};
-}
+
 function displayLocation(locationArray) {
 	let locationDiv = document.querySelector('.loactionsChoice');
 	locationDiv.innerHTML = '';
@@ -312,12 +312,12 @@ function displayLocation(locationArray) {
 	if (darkmodeStorge == 'true' || darkMoodStatus == true) {
 		//if darkmood is on add dark my location btn
 		locationDiv.innerHTML = `<div>
-	<button class="btn btn-dark  my-2 mx-2 btnActive btnActive-dark" data-latitude="" data-longitude="" type="button">My Location</button>
+	<button class="btn btn-dark  my-2 mx-2 btnActive btnActive-dark my-location"  type="button">My Location</button>
  	 </div>`;
 	} else {
 		//if darkmood is off add normal my location btn
 		locationDiv.innerHTML = `<div>
-	<button class="btn my-2 mx-2 btnActive" data-latitude="" data-longitude="" type="button">My Location</button>
+	<button class="btn my-2 mx-2 btnActive my-location" type="button">My Location</button>
   	</div>`;
 	}
 	for (let i = 0; i < locationArray.length; i++) {
@@ -328,7 +328,6 @@ function displayLocation(locationArray) {
 		let long = locationArray[i].longitude;
 		let locationName = locationArray[i].location;
 		let id = locationArray[i].id;
-
 		if (darkmodeStorge == 'true' || darkMoodStatus == true) {
 			//if darkmood is on add dark btn
 			newDiv.innerHTML = `
@@ -350,22 +349,16 @@ document.addEventListener('click', (e) => {
 	let { target } = e;
 	if (target && target.classList.contains('deleteLoc')) {
 		let loacId = parseInt(target.dataset.id);
-		console.log(loacId);
 
 		deleteLocation(loacId);
 	}
 });
 
-async function deleteLocation(loacId) {
+function deleteLocation(loacId) {
 	if (confirm('Confirm Deleting?')) {
-		let deleteRequest = await LocationsObj.delete(loacId);
-
-		deleteRequest.onsuccess = () => {
-			document.getElementById('location-' + loacId).remove();
-		};
-		deleteRequest.onerror = () => {
-			alert('Something Went Wrong While Deleting!!!');
-		};
+		Storage.deleteLocation(loacId);
+		locations = locations.filter((location) => location.id != loacId);
+		document.getElementById('location-' + loacId).remove();
 	} else {
 		return false;
 	}
