@@ -139,7 +139,7 @@ async function getCurrentNeerWeather(currentNeerUrl) {
 			locationsNeerDiv.append(newDiv);
 		}
 
-		console.log(weather);
+	
 	}
 }
 //calling the api
@@ -174,7 +174,7 @@ async function getWeekWeather(WeekUrl) {
 
 		MaxTempValue.innerText = `${Math.floor(weather.daily[0].temp.max)}° `;
 		MinTempValue.innerText = `${Math.floor(weather.daily[0].temp.min)}° `;
-		console.log(weather);
+	
 	}
 }
 //dark mode
