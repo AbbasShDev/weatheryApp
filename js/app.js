@@ -162,6 +162,11 @@ if (darkmodeStorge == null) {
 
 if (darkmodeStorge != null) {
 	document.getElementById('css-link').href = localStorage.getItem('darkmood');
+	if (localStorage.getItem('darkmood') == 'css/main.css') {
+		document.querySelector('.darkmode-toggler').classList.remove('darkmode-toggler-dark');
+	} else if (localStorage.getItem('darkmood') == 'css/main-dark.css') {
+		document.querySelector('.darkmode-toggler').classList.add('darkmode-toggler-dark');
+	}
 }
 darkmodeToggler.addEventListener('click', () => {
 	if (localStorage.getItem('darkmood') == 'css/main.css') {
