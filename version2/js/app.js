@@ -8,16 +8,40 @@ let humidityValue = document.querySelector('.humidity-value');
 let windValue = document.querySelector('.wind-value');
 let MaxTempValue = document.querySelector('.max-temp-value');
 let MinTempValue = document.querySelector('.min-temp-value');
-
+let darkMoodStatus;
 let myDate = new Date();
 
 let ApiKey = 'e0ad44b9250db28e45669dbbcc1f88a9';
 
+let darkmodeStorge = localStorage.getItem('darkmoodStorge');
 window.addEventListener('load', () => {
 	getAllLocations();
 
 	geolocationWeather();
 });
+
+//if darkmoodStorge in local storge not = to null
+if (darkmodeStorge !== null && darkmodeStorge == 'true') {
+	document.querySelector('.darkmode-toggler').classList.add('darkmode-toggler-dark');
+	document.body.classList.add('body-dark');
+	const allbtn = document.querySelectorAll('.loactionsChoice .btn');
+	allbtn.forEach((btn) => {
+		if (btn.classList.contains('btnActive')) {
+			btn.classList.toggle('btnActive-dark');
+		}
+		btn.classList.add('btn-dark');
+	});
+
+	const allSections = document.querySelectorAll('.weather-style');
+
+	allSections.forEach((sec) => {
+		sec.classList.add('weather-style-dark');
+	});
+
+	document.querySelector('.navbar-brand').classList.add('navbar-brand-dark');
+	document.querySelector('input').classList.add('input-dark');
+	document.querySelector('.add-city-btn').classList.add('add-city-btn-dark');
+}
 
 //geting all locations btn
 let locationsBtn = document.querySelectorAll('.loactionsChoice .btn');
@@ -116,6 +140,8 @@ async function getCurrentNeerWeather(currentNeerUrl) {
 			locationsNeerDiv.append(newDiv);
 		}
 		document.querySelector('.loading').style.display = 'none';
+
+		console.log(weather);
 	}
 }
 //calling the api
@@ -150,29 +176,31 @@ async function getWeekWeather(WeekUrl) {
 
 		MaxTempValue.innerText = `${Math.floor(weather.daily[0].temp.max)}° `;
 		MinTempValue.innerText = `${Math.floor(weather.daily[0].temp.min)}° `;
+		console.log(weather);
 	}
 }
-
-//darkmode
+//dark mode
+if (document.body.classList.contains('body-dark')) {
+	//set while loading the page
+	darkMoodStatus = true;
+} else {
+	darkMoodStatus = false;
+}
 const darkmodeToggler = document.querySelector('.darkmode-toggler');
-let darkmodeStorge = localStorage.getItem('darkmood');
-if (darkmodeStorge == null) {
-	localStorage.setItem('darkmood', 'css/main.css');
-}
 
-if (darkmodeStorge != null) {
-	document.getElementById('css-link').href = localStorage.getItem('darkmood');
-}
 darkmodeToggler.addEventListener('click', () => {
-	if (localStorage.getItem('darkmood') == 'css/main.css') {
-		localStorage.setItem('darkmood', 'css/main-dark.css');
-		document.getElementById('css-link').href = 'css/main-dark.css';
-	} else if (localStorage.getItem('darkmood') == 'css/main-dark.css') {
-		localStorage.setItem('darkmood', 'css/main.css');
-		document.getElementById('css-link').href = 'css/main.css';
+	console.log('hey');
+
+	if (document.body.classList.contains('body-dark')) {
+		//set while loading the page
+		darkMoodStatus = true;
+		//set after loading the page
+		localStorage.setItem('darkmoodStorge', 'true');
+	} else {
+		darkMoodStatus = false;
+		localStorage.setItem('darkmoodStorge', 'false');
 	}
 });
-//darkmode
 
 let clearAll = document.querySelector('.clear-all-btn');
 
@@ -185,11 +213,17 @@ async function clearAllLocations() {
 		Storage.clearAllLocations();
 
 		document.querySelector('.loactionsChoice').innerHTML = '';
-
-		//add  my location btn
-		document.querySelector('.loactionsChoice').innerHTML = ` <div>
+		if (darkmodeStorge == 'true' || darkMoodStatus == true) {
+			//if darkmood is on add dark my location btn
+			document.querySelector('.loactionsChoice').innerHTML = `<div>
+			<button class="btn btn-dark  my-2 mx-2 btnActive btnActive-dark my-location" type="button">My Location</button>
+			  </div>`;
+		} else {
+			//if darkmood is off add normal my location btn
+			document.querySelector('.loactionsChoice').innerHTML = ` <div>
 				<button class="btn my-2 mx-2 btnActive my-location" type="button">My Location</button>
 			  </div>`;
+		}
 	} else {
 		return false;
 	}
@@ -253,11 +287,17 @@ function displayLocation(locationArray) {
 	let locationDiv = document.querySelector('.loactionsChoice');
 	locationDiv.innerHTML = '';
 
-	//add my location btn
-	locationDiv.innerHTML = `<div>
+	if (darkmodeStorge == 'true' || darkMoodStatus == true) {
+		//if darkmood is on add dark my location btn
+		locationDiv.innerHTML = `<div>
+	<button class="btn btn-dark  my-2 mx-2 btnActive btnActive-dark my-location"  type="button">My Location</button>
+ 	 </div>`;
+	} else {
+		//if darkmood is off add normal my location btn
+		locationDiv.innerHTML = `<div>
 	<button class="btn my-2 mx-2 btnActive my-location" type="button">My Location</button>
   	</div>`;
-
+	}
 	for (let i = 0; i < locationArray.length; i++) {
 		let newDiv = document.createElement('div');
 		newDiv.id = 'location-' + locationArray[i].id;
@@ -266,11 +306,17 @@ function displayLocation(locationArray) {
 		let long = locationArray[i].longitude;
 		let locationName = locationArray[i].location;
 		let id = locationArray[i].id;
-
-		//add  btn
-		newDiv.innerHTML = `
+		if (darkmodeStorge == 'true' || darkMoodStatus == true) {
+			//if darkmood is on add dark btn
+			newDiv.innerHTML = `
+			<button class="btn btnStyle btn-dark my-2 mx-2"  data-latitude=${lat} data-longitude=${long} type="button">${locationName}<span class="location-span"><i class="fa fa-times-circle deleteLoc" data-id=${id} ></i></span></button>
+			`;
+		} else {
+			//if darkmood is off add normal btn
+			newDiv.innerHTML = `
 			<button class="btn btnStyle my-2 mx-2"  data-latitude=${lat} data-longitude=${long} type="button">${locationName}<span class="location-span"><i class="fa fa-times-circle deleteLoc" data-id=${id} ></i></span></button>
 			`;
+		}
 
 		locationDiv.append(newDiv);
 	}
