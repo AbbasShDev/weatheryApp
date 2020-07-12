@@ -3,8 +3,7 @@ class Storage {
 		localStorage.setItem('locations', JSON.stringify(locations));
 	}
 	static getLocations() {
-		let locations = localStorage.getItem('locations');
-		if (locations) {
+		if (localStorage.getItem('locations')) {
 			return JSON.parse(localStorage.getItem('locations'));
 		} else {
 			return false;
@@ -16,6 +15,6 @@ class Storage {
 		localStorage.setItem('locations', JSON.stringify(locations));
 	}
 	static clearAllLocations() {
-		localStorage.setItem('locations', '');
+		localStorage.setItem('locations', null);
 	}
 }

@@ -179,6 +179,7 @@ darkmodeToggler.addEventListener('click', () => {
 	document.querySelector('.darkmode-toggler').classList.toggle('darkmode-toggler-dark');
 });
 //darkmode
+let locations = [];
 
 let clearAll = document.querySelector('.clear-all-btn');
 
@@ -196,6 +197,7 @@ async function clearAllLocations() {
 		document.querySelector('.loactionsChoice').innerHTML = ` <div>
 				<button class="btn my-2 mx-2 btnActive my-location" type="button">My Location</button>
 			  </div>`;
+		locations = [];
 	} else {
 		return false;
 	}
@@ -234,7 +236,6 @@ async function getCityLatLang(cityUrl, inputValue) {
 	}
 }
 
-let locations = [];
 let locationsStorage = Storage.getLocations();
 if (locationsStorage) {
 	for (let i = 0; i < locationsStorage.length; i++) {
@@ -248,10 +249,8 @@ async function addLocation(loc, lat, long) {
 	getAllLocations();
 }
 function getAllLocations() {
-	let locations = Storage.getLocations();
-
-	if (locations) {
-		displayLocation(locations);
+	if (Storage.getLocations()) {
+		displayLocation(Storage.getLocations());
 	}
 }
 
