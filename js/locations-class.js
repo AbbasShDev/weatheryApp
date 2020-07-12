@@ -1,45 +1,21 @@
-class Locations {
-	dbVersion = 1;
-	dbName = 'myDataBase';
-
-	connect() {
-		return new Promise((resolve, reject) => {
-			const request = indexedDB.open(this.dbName, this.dbVersion);
-
-			request.onupgradeneeded = () => {
-				let db = request.result;
-				if (!db.objectStoreNames.contains('locations')) {
-					db.createObjectStore('locations', { keyPath: 'id', autoIncrement: true });
-				}
-			};
-
-			request.onsuccess = () => resolve(request.result);
-			request.onerror = () => reject(request.error.message);
-			request.onblocked = () => console.log('Storge is blocked');
-		});
+class Storage {
+	static saveLocations(locations) {
+		localStorage.setItem('locations', JSON.stringify(locations));
 	}
-
-	async storeAccess(type) {
-		let connect = await this.connect();
-		let tx = connect.transaction('locations', type);
-		return tx.objectStore('locations');
+	static getLocations() {
+		let locations = localStorage.getItem('locations');
+		if (locations) {
+			return JSON.parse(localStorage.getItem('locations'));
+		} else {
+			return false;
+		}
 	}
-
-	async add(location) {
-		let store = await this.storeAccess('readwrite');
-		return store.put(location);
+	static deleteLocation(id) {
+		let locations = JSON.parse(localStorage.getItem('locations'));
+		locations = locations.filter((location) => location.id != id);
+		localStorage.setItem('locations', JSON.stringify(locations));
 	}
-
-	async getAll() {
-		let locations = await this.storeAccess('readonly');
-		return locations.openCursor(null, 'next');
-	}
-	async delete(locationId) {
-		let store = await this.storeAccess('readwrite');
-		return store.delete(locationId);
-	}
-	async clear() {
-		let locations = await this.storeAccess('readwrite');
-		return locations.clear();
+	static clearAllLocations() {
+		localStorage.setItem('locations', '');
 	}
 }
